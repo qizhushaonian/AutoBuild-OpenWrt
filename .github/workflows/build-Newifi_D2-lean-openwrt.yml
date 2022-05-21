@@ -78,15 +78,15 @@ env:
    # 分支
    BRANCH: Newifi_D2-Lean
    # Github 用户名
-   GITHUB_USER_NAME: danxiaonuo
+   GITHUB_USER_NAME: qizhushaonian
    # Github 邮箱
    GITHUB_USER_EMAIL: ${{ secrets.EMAIL }}
    # Github
-   GITHUB: github.com/danxiaonuo/AutoBuild-OpenWrt.git
+   GITHUB: github.com/qizhushaonian/AutoBuild-OpenWrt.git
    # 创建+上传发布
    CREATE_RELEASE: true
    # 编译者
-   BUILD_USER: danxiaonuo
+   BUILD_USER: qizhushaonian
    # 微信通知
    SEND_WECHAT_MSG: true
    # 发行固件地址
@@ -169,9 +169,12 @@ jobs:
         make defconfig
     
     # 连接SSH
-    - name: 连接SSH
-      uses: P3TERX/debugger-action@master
-      if: env.SSH_ACTIONS == 'true'
+    - name: SSH connection to Actions
+      uses: P3TERX/ssh2actions@v1.0.0
+      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+      env:
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
     
     # 下载固件包
     - name: 下载固件包
