@@ -131,9 +131,9 @@ jobs:
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
         cd openwrt
         useVersionInfo=$(git show -s --date=short --format="Author: %an<br/>Date: %cd<br/>Commit: %s")
-        echo "::set-env name=useVersionInfo::$useVersionInfo"
-        echo "::set-env name=DATE::$(TZ=CST-8 date "+%Y%m%d%H%M%S")"
-        echo "::set-env name=RELEASE_DATE::$(TZ=CST-8 date +"%Y.%m.%d-%H")"
+        echo "useVersionInfo=$useVersionInfo" >> $GITHUB_ENV
+        echo "DATE=$(TZ=CST-8 date "+%Y%m%d%H%M%S")" >> $GITHUB_ENV
+        echo "RELEASE_DATE=$(TZ=CST-8 date +"%Y.%m.%d-%H")" >> $GITHUB_ENV
       
     # 加载自定义脚本  
     - name: 加载自定义脚本
@@ -237,7 +237,7 @@ jobs:
         curl -fsSL git.io/file-transfer | sh
         ./transfer cow --block 2621440 -s -p 99 -t 3 --hash --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
         echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
-        echo "::set-env name=COWTRANSFER_URL::$(cat cowtransfer.log | grep https | cut -f3 -d" ")"
+        echo "COWTRANSFER_URL=$(cat cowtransfer.log | grep https | cut -f3 -d" ")" >> $GITHUB_ENV
     
     # 上传固件到WeTransfer
     - name: 上传固件到WeTransfer
@@ -246,7 +246,7 @@ jobs:
         curl -fsSL git.io/file-transfer | sh
         ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
         echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
-        echo "::set-env name=WETRANSFER_URL::$(cat wetransfer.log | grep https | cut -f3 -d" ")"
+        echo "WETRANSFER_URL=$(cat wetransfer.log | grep https | cut -f3 -d" ")" >>$GITHUB_ENV
     
     # 上传文件到Tmp.Link
     - name: 上传文件到Tmp.Link
@@ -272,7 +272,7 @@ jobs:
       id: tag
       if: steps.compile.outputs.status == 'success' && env.CREATE_RELEASE == 'true' && !cancelled()
       run: |
-        echo ::set-env name=RELEASE_TAG::"OpenWrt-${{ env.BRANCH }}-${{ env.RELEASE_DATE }}"
+        echo RELEASE_TAG="OpenWrt-${{ env.BRANCH }}-${{ env.RELEASE_DATE }}" >> $GITHUB_ENV
         echo "::set-output name=status::success"
     
     # 发行固件
