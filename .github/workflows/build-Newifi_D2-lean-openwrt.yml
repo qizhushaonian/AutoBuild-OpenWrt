@@ -64,17 +64,18 @@ env:
    # 临时文件名称
    DOWNLOAD_URL_FILE: Tmp-Link-Url.txt
    # 上传临时文件
-   UPLOAD_TMP_LINK: true
+   UPLOAD_TMP_LINK: false
    # 上传 bin 目录
    UPLOAD_BIN_DIR: false
+   UPLOAD_RELEASES: true
    # 上传固件目录
    UPLOAD_FIRMWARE: true
    # 上传固件到奶牛快传
-   UPLOAD_COWTRANSFER: true
+   UPLOAD_COWTRANSFER: false
    # 上传固件到 WeTransfer
-   UPLOAD_WETRANSFER: true
+   UPLOAD_WETRANSFER: false
    # 上传分支
-   UPLOAD_BRANCH: true
+   UPLOAD_BRANCH: false
    # 分支
    BRANCH: Newifi_D2-Lean
    # Github 用户名
@@ -297,7 +298,15 @@ jobs:
             ${{ env.useVersionInfo }}
             ${{ github.event.commits[0].message }}
         files: ${{ env.FIRMWARE }}/*
-
+    - name: Upload Firmware to Github Release
+      uses: svenstaro/upload-release-action@v2
+      if: env.UPLOAD_RELEASES == 'true' && env.Result == 'true' && !cancelled()
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: openwrt/bin/Firmware/*
+        file_glob: true
+        tag: AutoUpdate
+        overwrite: true
     # 微信通知
     - name: 微信通知
       if: steps.compile.outputs.status == 'success' && env.SEND_WECHAT_MSG == 'true' && !cancelled()
